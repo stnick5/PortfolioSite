@@ -1,0 +1,30 @@
+@page "/KanaTrainer"
+
+<div class="game-container text-center">
+    <h3 class="title">KanaTrainer</h3>
+    
+    <select class="combobox-menu">
+        <option value="Hiragana">Hiragana</option>
+        <option value="Katakana">Katakana</option>
+    </select>
+    
+    <button class="btn btn-primary" disabled=@IsTaskRunning @onclick="Clicked">@ButtonName</button>
+</div>
+@code {
+    bool IsTaskRunning = false;
+    string ButtonName = "Click Me";
+
+    async void Clicked()
+    {
+        IsTaskRunning = true;
+        ButtonName = "Disabled";
+        await OnButtonClick();
+
+        StateHasChanged();
+    }
+
+    Task OnButtonClick()
+    {
+        return Task.Delay(6000);
+    }
+}

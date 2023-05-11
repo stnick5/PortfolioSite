@@ -1,0 +1,51 @@
+@page "/DataInTable"
+@using System.Text.Json
+@using System.Runtime.Serialization
+@inject HttpClient Http
+@inject IJSRuntime jsRuntime
+
+<h3>DataInTable</h3>
+
+<div class="grid-container" @ref="gridContainer">
+    @if (_characterSet == null)
+    {
+        <p>
+            <em>Loading...</em>
+        </p>
+    }
+    else
+    {
+        @foreach (var item in _characterSet)
+        {
+            <div class="grid-item" style="--row-start: @item.Row; --col-start: @item.Column">@item.Character</div>
+        }
+        
+    }
+</div>
+
+@code {
+    private CharacterItem[]? _characterSet;
+    private ElementReference gridContainer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _characterSet = await Http.GetFromJsonAsync<CharacterItem[]>("sample-data/hiragana.json");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var computedStyles = await jsRuntime.InvokeAsync<Dictionary<string, Dictionary<string, string>>>("getCellStyles", gridContainer);
+            Console.WriteLine(JsonSerializer.Serialize(computedStyles));
+        }
+    }
+
+    public class CharacterItem
+    {
+        public string Character { get; set; }
+        public string Phonetic { get; set; }
+        public int Row { get; set; }
+        public int Column { get; set; }
+    }
+}
