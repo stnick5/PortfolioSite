@@ -1,30 +1,89 @@
 @page "/KanaTrainer"
+@using System.Net
+@inject HttpClient Http;
 
 <div class="game-container text-center">
-    <h3 class="title">KanaTrainer</h3>
+    <h2 class="title">Learn Hiragana and Katakana</h2>
     
-    <select class="combobox-menu">
-        <option value="Hiragana">Hiragana</option>
-        <option value="Katakana">Katakana</option>
-    </select>
+    <div class="game-setup text-center">
+        <h3 class="SelectedOption">@SelectedGameOption</h3>
+        <select class="combobox-menu" @onchange="HandleOptionOnChange">
+            <option value="Hiragana">Hiragana</option>
+            <option value="Katakana">Katakana</option>
+        </select>
+    </div>
     
-    <button class="btn btn-primary" disabled=@IsTaskRunning @onclick="Clicked">@ButtonName</button>
+    <div class="grid-container hiragana-container text-center" hidden="@HiraganaHidden" @ref="_gridContainer">
+        @if (_hiraganaSet == null)
+        {
+            <p>
+                <em>Loading...</em>
+            </p>
+        }
+        else
+        {
+            @foreach (var item in _hiraganaSet)
+            {
+                <div class="grid-item" style="--row-start: @item.Row; --col-start: @item.Column">@item.Character</div>
+            }
+        }
+    </div>
+    <div class="grid-container katakana-container text-center" hidden="@KatakanaHidden" @ref="_gridContainer">
+        @if (_katakanaSet == null)
+        {
+            <p>
+                <em>Loading...</em>
+            </p>
+        }
+        else
+        {
+            @foreach (var item in _katakanaSet)
+            {
+                <div class="grid-item" style="--row-start: @item.Row; --col-start: @item.Column">@item.Character</div>
+            }
+        }
+    </div>
+    <div class="katakana-setup text-center">
+        
+    </div>
 </div>
 @code {
-    bool IsTaskRunning = false;
-    string ButtonName = "Click Me";
+    private const string Hiragana = "ひらがな";
+    private const string Katakana = "カタカナ";
+    private bool HiraganaHidden = true;
+    private bool KatakanaHidden = true;
 
-    async void Clicked()
+    private string SelectedGameOption;
+
+    private CharacterItem[]? _hiraganaSet;
+    private CharacterItem[]? _katakanaSet;
+    private ElementReference _gridContainer;
+
+    protected override async Task OnInitializedAsync()
     {
-        IsTaskRunning = true;
-        ButtonName = "Disabled";
-        await OnButtonClick();
-
-        StateHasChanged();
+        SelectedGameOption = Hiragana;
+        _hiraganaSet = await Http.GetFromJsonAsync<CharacterItem[]>("sample-data/hiragana.json");
+        _katakanaSet = await Http.GetFromJsonAsync<CharacterItem[]>("sample-data/katakana.json");
     }
 
-    Task OnButtonClick()
+    private void HandleOptionOnChange(ChangeEventArgs e)
     {
-        return Task.Delay(6000);
+        var selectedOption = e.Value.ToString();
+
+        if (selectedOption == "Hiragana")
+        {
+            SelectedGameOption = Hiragana;
+            HiraganaHidden = false;
+            KatakanaHidden = true;
+        }
+        else if (selectedOption == "Katakana")
+        {
+            SelectedGameOption = Katakana;
+            HiraganaHidden = true;
+            KatakanaHidden = false;
+        }
     }
+
+    public record CharacterItem(string Character, string Phonetic, int Row, int Column);
+
 }

@@ -34,11 +34,11 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            var computedStyles = await jsRuntime.InvokeAsync<Dictionary<string, Dictionary<string, string>>>("getCellStyles", gridContainer);
-            Console.WriteLine(JsonSerializer.Serialize(computedStyles));
-        }
+        // if (firstRender)
+        // {
+        //     var computedStyles = await jsRuntime.InvokeAsync<Dictionary<string, Dictionary<string, string>>>("getCellStyles", gridContainer);
+        //     Console.WriteLine(JsonSerializer.Serialize(computedStyles));
+        // }
     }
 
     public class CharacterItem
